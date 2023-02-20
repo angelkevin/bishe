@@ -55,13 +55,13 @@ jobs:
 
       - name: 'Work'
         run: |
-          git config --local user.email "2215408861@qq.com"
-          git config --local user.name "angelkevin"
-          git config --global http.sslVerify "false"
-          echo ${{ secrets.GITHUB_TOKEN }}
-          git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git pull --rebase
           python spider.py
-          git add .
-          git commit -m "update by github action"
-          git push -u origin main
+          
+       
+      - name: Commit and push files
+        uses: stefanzweifel/git-auto-commit-action@v4 # 提交并推送更改
+        with:
+          commit_message: Update data
+          branch: main # 指定提交到哪个分支
+          commit_user_name: angelkevin
+          commit_user_email: 2215408861@qq.com
