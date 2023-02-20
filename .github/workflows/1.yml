@@ -49,7 +49,14 @@ jobs:
             && sudo mv chromedriver /usr/local/bin/chromedriver \
             && sudo chmod +x /usr/local/bin/chromedriver \
             && chromedriver --version
-          
+
       - name: 'Work'
         run: |
+          git config --local user.email "2215408861@qq.com"
+          git config --local user.name "angelkevin"
+          git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git pull --rebase
           python spider.py
+          git add .
+          git commit -m "update by github action"
+          git push
