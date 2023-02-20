@@ -5,8 +5,8 @@ from selenium.webdriver.common.by import By
 import time
 import pandas as pd
 import threading
-import pymysql
-from sqlalchemy import create_engine
+# import pymysql
+# from sqlalchemy import create_engine
 import os
 
 # pymysql.install_as_MySQLdb()
