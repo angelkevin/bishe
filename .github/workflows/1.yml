@@ -54,7 +54,7 @@ jobs:
         run: |
           git config --local user.email "2215408861@qq.com"
           git config --local user.name "angelkevin"
-          git remote set-url origin git@github.com:angelkevin/bishe.git
+          git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git pull --rebase
           python spider.py
           git add .
