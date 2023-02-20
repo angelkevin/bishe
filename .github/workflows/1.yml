@@ -58,6 +58,7 @@ jobs:
           git config --local user.email "2215408861@qq.com"
           git config --local user.name "angelkevin"
           git config --global http.sslVerify "false"
+          echo ${{ secrets.GITHUB_TOKEN }}
           git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git pull --rebase
           python spider.py
