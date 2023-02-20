@@ -57,7 +57,6 @@ jobs:
         run: |
           git config --local user.email "2215408861@qq.com"
           git config --local user.name "angelkevin"
-          git config --global --unset http.proxy
           git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git pull --rebase
           python spider.py
