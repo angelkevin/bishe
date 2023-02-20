@@ -13,12 +13,12 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   schedule:
-    - cron: '30 9,10 * * *'
+    - cron: '1,31 0,22,23 * * *'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  Build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -28,17 +28,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: setup-chromedriver
-        uses: nanasess/setup-chromedriver@v1.0.1
-
+      # Runs a single command using the runners shell
       - name: 'Set up Python'
         uses: actions/setup-python@v1
         with:
-           python-version: 3.7
+           python-version: 3.9
+
       - name: 'Install requirements'
-        run: pip install -r requirements.txt
-      - name: 'Working'
         run: |
-          sudo cp -p chromedriver /usr/bin/
-          chmod -R 777 /usr/bin/chromedriver
+          pip install -r requirements.txt
+
+      - name: Install ChromeDriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | cut -f 3 -d ' ' | cut -d '.' -f 1) \
+            && CHROMEDRIVER_RELEASE=$(curl --location --fail --retry 3 http://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}) \
+            && curl --silent --show-error --location --fail --retry 3 --output /tmp/chromedriver_linux64.zip "http://chromedriver.storage.googleapis.com/$CHROMEDRIVER_RELEASE/chromedriver_linux64.zip" \
+            && cd /tmp \
+            && unzip chromedriver_linux64.zip \
+            && rm -rf chromedriver_linux64.zip \
+            && sudo mv chromedriver /usr/local/bin/chromedriver \
+            && sudo chmod +x /usr/local/bin/chromedriver \
+            && chromedriver --version
+          
+      - name: 'Work'
+        run: |
           python spider.py
