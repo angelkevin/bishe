@@ -8,9 +8,10 @@ import threading
 import pymysql
 from sqlalchemy import create_engine
 
-pymysql.install_as_MySQLdb()
-DB_STRING = "mysql+mysqldb://root:@127.0.0.1/gpdb"
-engine = create_engine(DB_STRING)
+
+# pymysql.install_as_MySQLdb()
+# DB_STRING = "mysql+mysqldb://root:@127.0.0.1/gpdb"
+# engine = create_engine(DB_STRING)
 URLs = [
     'https://quote.eastmoney.com/center/gridlist.html#sz_a_board',
     'https://quote.eastmoney.com/center/gridlist.html#hs_a_board',
@@ -103,7 +104,8 @@ def spider(url):
 
 
 def save_data(data, name):
-    today = time.strftime('%Y-%m-%d-%H', time.localtime())
+    today = time.strftime('%Y-%m-%d', time.localtime())
+    today1 = time.strftime('%H-%M', time.localtime())
     df = pd.DataFrame(data, columns=[
         'serial_number',
         'code',
@@ -125,9 +127,9 @@ def save_data(data, name):
     ])
     df = df.replace('-', '0')
     df = df.drop_duplicates(subset=['code'], keep='first')
-    df.insert(17, 'create_time', str(today), allow_duplicates=False)
-    df.to_sql('stock_market_data', con=engine, chunksize=10000, if_exists='append', index=False)
-    df.to_csv(path_or_buf=f"D:/Python/bishe/data/{name}_{today}.csv", index=False, header=False, encoding="UTF-8")
+    df.insert(17, 'create_time', str(today1), allow_duplicates=False)
+    # df.to_sql('stock_market_data', con=engine, chunksize=10000, if_exists='append', index=False)
+    df.to_csv(path_or_buf=f"data/{name}/{today}.csv", index=False, header=False, encoding="UTF-8")
 
 
 if __name__ == '__main__':
