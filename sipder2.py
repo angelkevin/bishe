@@ -4,9 +4,9 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import time
 import pandas as pd
-import threading
-import pymysql
-from sqlalchemy import create_engine
+# import threading
+# import pymysql
+# from sqlalchemy import create_engine
 
 
 # pymysql.install_as_MySQLdb()
@@ -129,7 +129,7 @@ def save_data(data, name):
     df = df.drop_duplicates(subset=['code'], keep='first')
     df.insert(17, 'create_time', str(today1), allow_duplicates=False)
     # df.to_sql('stock_market_data', con=engine, chunksize=10000, if_exists='append', index=False)
-    df.to_csv(path_or_buf=f"data/{name}/{today}.csv", index=False, header=False, encoding="UTF-8")
+    df.to_csv(path_or_buf=f"./data/{name}/{today}.csv", index=False, header=False, encoding="UTF-8")
 
 
 if __name__ == '__main__':
