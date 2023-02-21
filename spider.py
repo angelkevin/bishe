@@ -22,6 +22,9 @@ URLs = [
 
 options = Options()
 options.add_argument('--headless')
+options.add_argument('--no-sandbox')
+options.add_argument('--disable-gpu')
+options.add_argument('--disable-dev-shm-usage')
 
 
 def spider(url):
@@ -128,8 +131,8 @@ def save_data(data, name):
     df = df.drop_duplicates(subset=['code'], keep='first')
     df.insert(17, 'create_time', str(today1), allow_duplicates=False)
     # df.to_sql('stock_market_data', con=engine, chunksize=10000, if_exists='append', index=False)
-    # os.mkdir(f"data/{name}")
-    df.to_csv(path_or_buf=f"./data/{name}/{today}.csv", index=False, header=False, encoding="UTF-8")
+    #os.mkdir(f"data/{name}")
+    df.to_csv(path_or_buf=f"/opt/bishe/data/{name}/{today}.csv", index=False, header=False, encoding="UTF-8")
 
 
 class myThread(threading.Thread):
