@@ -102,6 +102,7 @@ def spider(url):
         driver.execute_script("$(arguments[0]).click()", button)
         time.sleep(1)
     print(len(result))
+    driver.close()
     return result
 
 
