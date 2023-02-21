@@ -65,17 +65,17 @@ def spider(url):
             else:
                 l.append(tt[6].text)
 
-            if "ä¸? in tt[7].text:
-                l.append(str(round(float(tt[7].text.split("ä¸?)[0]) * 10000, 2)))
-            elif "äº? in tt[7].text:
-                l.append(str(round(float(tt[7].text.split("ä¸?)[0]) * 100000000, 2)))
+            if "ä¸‡" in tt[7].text:
+                l.append(str(round(float(tt[7].text.split("ä¸‡")[0]) * 10000, 2)))
+            elif "äº¿" in tt[7].text:
+                l.append(str(round(float(tt[7].text.split("ä¸‡")[0]) * 100000000, 2)))
             else:
                 l.append(tt[7].text)
 
-            if "ä¸? in tt[8].text:
-                l.append(str(round(float(tt[8].text.split("ä¸?)[0]) * 10000, 2)))
-            elif "äº? in tt[8].text:
-                l.append(str(round(float(tt[8].text.split("äº?)[0]) * 100000000, 2)))
+            if "ä¸‡" in tt[8].text:
+                l.append(str(round(float(tt[8].text.split("ä¸‡")[0]) * 10000, 2)))
+            elif "äº¿" in tt[8].text:
+                l.append(str(round(float(tt[8].text.split("äº¿")[0]) * 100000000, 2)))
             else:
                 l.append(tt[8].text)
 
