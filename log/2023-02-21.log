@@ -1,18 +1,12 @@
-Starting Thread-1
-Starting Thread-2
-Starting Thread-3
-509
-https://quote.eastmoney.com/center/gridlist.html#kcb_board
-114
-https://quote.eastmoney.com/center/gridlist.html#b_board
-Exiting Thread-3
-2280
-https://quote.eastmoney.com/center/gridlist.html#sh_a_board
 2852
 https://quote.eastmoney.com/center/gridlist.html#sz_a_board
 172
 https://quote.eastmoney.com/center/gridlist.html#bj_a_board
-Exiting Thread-1
+2280
+https://quote.eastmoney.com/center/gridlist.html#sh_a_board
 1258
 https://quote.eastmoney.com/center/gridlist.html#gem_board
-Exiting Thread-2
+509
+https://quote.eastmoney.com/center/gridlist.html#kcb_board
+114
+https://quote.eastmoney.com/center/gridlist.html#b_board

@@ -5,13 +5,17 @@ from selenium.webdriver.common.by import By
 import time
 import pandas as pd
 import threading
-# import pymysql
-# from sqlalchemy import create_engine
+import pymysql
+from sqlalchemy import create_engine
 import os
 
-# pymysql.install_as_MySQLdb()
-# DB_STRING = "mysql+mysqldb://root:@127.0.0.1/gpdb"
-# engine = create_engine(DB_STRING)
+pymysql.install_as_MySQLdb()
+user_name = 'root'
+password = 'zkw666..'
+
+DB_STRING = f"mysql+mysqldb://{user_name}:{password}@127.0.0.1:3306/gpdb?charset=utf8"
+engine = create_engine(DB_STRING)
+
 URLs = [
     'https://quote.eastmoney.com/center/gridlist.html#sz_a_board',
     'https://quote.eastmoney.com/center/gridlist.html#bj_a_board',
@@ -100,15 +104,16 @@ def spider(url):
             result.append(l)
         button = driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[2]/div[2]/div[5]/div/div[2]/div/a[2]')
         driver.execute_script("$(arguments[0]).click()", button)
-        time.sleep(1)
+        time.sleep(0.5)
     print(len(result))
+    print(url)
     driver.close()
     return result
 
 
 def save_data(data, name):
     today = time.strftime('%Y-%m-%d', time.localtime())
-    today1 = time.strftime('%H-%M', time.localtime())
+    today1 = str(time.time())
     df = pd.DataFrame(data, columns=[
         'serial_number',
         'code',
@@ -131,42 +136,14 @@ def save_data(data, name):
     df = df.replace('-', '0')
     df = df.drop_duplicates(subset=['code'], keep='first')
     df.insert(17, 'create_time', str(today1), allow_duplicates=False)
-    # df.to_sql('stock_market_data', con=engine, chunksize=10000, if_exists='append', index=False)
-    #os.mkdir(f"data/{name}")
-    df.to_csv(path_or_buf=f"/opt/bishe/data/{name}/{today}.csv", index=False, header=False, encoding="UTF-8")
-
-
-class myThread(threading.Thread):
-    def __init__(self, name, link_range):
-        threading.Thread.__init__(self)
-        self.name = name
-        self.link_range = link_range
-
-    def run(self):
-        print("Starting " + self.name)
-        crawl(self.name, self.link_range)
-        print("Exiting " + self.name)
-
-
-def crawl(threadNmae, link_range):
-    for i in range(link_range[0], link_range[1] + 1):
-        try:
-            data = spider(URLs[i])
-            print(URLs[i])
-            save_data(data, URLs[i].split('#')[1])
-        except Exception as e:
-            print(threadNmae, "Error: ", e)
-
-
-threads = []
-link_range_list = [(0, 1), (2, 3), (4, 5)]
+    df.to_sql('stock_market_data', con=engine, chunksize=10000, if_exists='append', index=False)
+    #os.mkdir(f"/opt/bishe/data/{name}")
+    df.to_csv(path_or_buf=f"/opt/bishe/data/{name}/{today}.csv", index=False, header=False, encoding="UTF-8",mode='a')
 
 if __name__ == '__main__':
 
-    for i in range(1, 4):
-        thread = myThread("Thread-" + str(i), link_range=link_range_list[i - 1])
-        thread.start()
-        threads.append(thread)
+    for i in URLs:
+        data = spider(i)
+        save_data(data,i.split('#')[1])
 
-    for thread in threads:
-        thread.join()
+
