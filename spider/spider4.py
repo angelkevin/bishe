@@ -64,17 +64,17 @@ def spider(url):
             else:
                 l.append(tt[6].text)
 
-            if "ä¸‡" in tt[7].text:
-                l.append(str(round(float(tt[7].text.split("ä¸‡")[0]) * 10000, 2)))
-            elif "äº¿" in tt[7].text:
-                l.append(str(round(float(tt[7].text.split("ä¸‡")[0]) * 100000000, 2)))
+            if "ä¸? in tt[7].text:
+                l.append(str(round(float(tt[7].text.split("ä¸?)[0]) * 10000, 2)))
+            elif "äº? in tt[7].text:
+                l.append(str(round(float(tt[7].text.split("ä¸?)[0]) * 100000000, 2)))
             else:
                 l.append(tt[7].text)
 
-            if "ä¸‡" in tt[8].text:
-                l.append(str(round(float(tt[8].text.split("ä¸‡")[0]) * 10000, 2)))
-            elif "äº¿" in tt[8].text:
-                l.append(str(round(float(tt[8].text.split("äº¿")[0]) * 100000000, 2)))
+            if "ä¸? in tt[8].text:
+                l.append(str(round(float(tt[8].text.split("ä¸?)[0]) * 10000, 2)))
+            elif "äº? in tt[8].text:
+                l.append(str(round(float(tt[8].text.split("äº?)[0]) * 100000000, 2)))
             else:
                 l.append(tt[8].text)
 
@@ -99,7 +99,7 @@ def spider(url):
             result.append(l)
         button = driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[2]/div[2]/div[5]/div/div[2]/div/a[2]')
         driver.execute_script("$(arguments[0]).click()", button)
-        time.sleep(0.5)
+        time.sleep(1)
     print(len(result))
     print(url)
     driver.close()
