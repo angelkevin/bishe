@@ -15,24 +15,29 @@ password = 'zkw666..'
 
 DB_STRING = f"mysql+mysqldb://{user_name}:{password}@127.0.0.1:3306/gpdb?charset=utf8"
 engine = create_engine(DB_STRING)
-
 URLs = [
-
-    'https://quote.eastmoney.com/center/gridlist.html#sh_a_board']
+    'https://quote.eastmoney.com/center/gridlist.html#sz_a_board',
+    'https://quote.eastmoney.com/center/gridlist.html#bj_a_board',
+    'https://quote.eastmoney.com/center/gridlist.html#sh_a_board',
+    'https://quote.eastmoney.com/center/gridlist.html#gem_board',
+    'https://quote.eastmoney.com/center/gridlist.html#kcb_board',
+    'https://quote.eastmoney.com/center/gridlist.html#b_board']
 
 options = Options()
 options.add_argument('--headless')
 options.add_argument('--no-sandbox')
 options.add_argument('--disable-gpu')
 options.add_argument('--disable-dev-shm-usage')
+driver = webdriver.Chrome(options=options)
+
 
 
 def spider(url):
     result = []
-    driver = webdriver.Chrome(options=options)
     driver.get(url)
+    time.sleep(1)
     page_num = driver.find_element(by=By.XPATH, value='//*[@id="main-table_paginate"]/span[1]/a[5]').text
-    for i in range(0, int(page_num)):
+    for i in range(0, int(page_num)+1):
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
         massage = soup.find_all(id="table_wrapper-table")
@@ -100,10 +105,8 @@ def spider(url):
             result.append(l)
         button = driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[2]/div[2]/div[5]/div/div[2]/div/a[2]')
         driver.execute_script("$(arguments[0]).click()", button)
-        time.sleep(1)
     print(len(result))
     print(url)
-    driver.close()
     return result
 
 
@@ -138,8 +141,9 @@ def save_data(data, name):
 
 if __name__ == '__main__':
 
-    for i in URLs:
-        data = spider(i)
-        save_data(data,i.split('#')[1])
+    for i in range(len(URLs)):
+        save_data(spider(URLs[i]),URLs[i].split('#')[1])
+    driver.close()
+
 
 
