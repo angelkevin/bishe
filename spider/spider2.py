@@ -4,28 +4,28 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import time
 import pandas as pd
-# import threading
-# import pymysql
-# from sqlalchemy import create_engine
+import threading
+import pymysql
+from sqlalchemy import create_engine
+import os
 
+pymysql.install_as_MySQLdb()
+user_name = 'root'
+password = 'zkw666..'
 
-# pymysql.install_as_MySQLdb()
-# DB_STRING = "mysql+mysqldb://root:@127.0.0.1/gpdb"
-# engine = create_engine(DB_STRING)
+DB_STRING = f"mysql+mysqldb://{user_name}:{password}@127.0.0.1:3306/gpdb?charset=utf8"
+engine = create_engine(DB_STRING)
+
 URLs = [
-    'https://quote.eastmoney.com/center/gridlist.html#sz_a_board',
-    'https://quote.eastmoney.com/center/gridlist.html#hs_a_board',
-    'https://quote.eastmoney.com/center/gridlist.html#bj_a_board',
-    'https://quote.eastmoney.com/center/gridlist.html#sh_a_board',
-    'https://quote.eastmoney.com/center/gridlist.html#gem_board',
-    'https://quote.eastmoney.com/center/gridlist.html#kcb_board',
-    'https://quote.eastmoney.com/center/gridlist.html#b_board']
+
+    'https://quote.eastmoney.com/center/gridlist.html#sh_a_board']
 
 options = Options()
 options.add_argument('--headless')
 options.add_argument('--no-sandbox')
 options.add_argument('--disable-gpu')
 options.add_argument('--disable-dev-shm-usage')
+
 
 def spider(url):
     result = []
@@ -100,14 +100,16 @@ def spider(url):
             result.append(l)
         button = driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[2]/div[2]/div[5]/div/div[2]/div/a[2]')
         driver.execute_script("$(arguments[0]).click()", button)
-        time.sleep(1)
+        time.sleep(0.5)
     print(len(result))
+    print(url)
+    driver.close()
     return result
 
 
 def save_data(data, name):
     today = time.strftime('%Y-%m-%d', time.localtime())
-    today1 = time.strftime('%H-%M', time.localtime())
+    today1 = str(time.time())
     df = pd.DataFrame(data, columns=[
         'serial_number',
         'code',
@@ -130,9 +132,14 @@ def save_data(data, name):
     df = df.replace('-', '0')
     df = df.drop_duplicates(subset=['code'], keep='first')
     df.insert(17, 'create_time', str(today1), allow_duplicates=False)
-    # df.to_sql('stock_market_data', con=engine, chunksize=10000, if_exists='append', index=False)
-    df.to_csv(path_or_buf=f"/opt/bishe/data/{name}/{today}.csv", index=False, header=False, encoding="UTF-8",mode="a")
-
+    df.to_sql('stock_market_data', con=engine, chunksize=10000, if_exists='append', index=False)
+    #os.mkdir(f"/opt/bishe/data/{name}")
+    df.to_csv(path_or_buf=f"/opt/bishe/data/{name}/{today}.csv", index=False, header=False, encoding="UTF-8",mode='a')
 
 if __name__ == '__main__':
-    save_data(spider(URLs[1]), URLs[1].split("#")[1])
+
+    for i in URLs:
+        data = spider(i)
+        save_data(data,i.split('#')[1])
+
+

@@ -17,12 +17,7 @@ DB_STRING = f"mysql+mysqldb://{user_name}:{password}@127.0.0.1:3306/gpdb?charset
 engine = create_engine(DB_STRING)
 
 URLs = [
-    'https://quote.eastmoney.com/center/gridlist.html#sz_a_board',
-    'https://quote.eastmoney.com/center/gridlist.html#bj_a_board',
-    'https://quote.eastmoney.com/center/gridlist.html#sh_a_board',
-    'https://quote.eastmoney.com/center/gridlist.html#gem_board',
-    'https://quote.eastmoney.com/center/gridlist.html#kcb_board',
-    'https://quote.eastmoney.com/center/gridlist.html#b_board']
+    'https://quote.eastmoney.com/center/gridlist.html#sz_a_board']
 
 options = Options()
 options.add_argument('--headless')

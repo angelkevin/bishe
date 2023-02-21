@@ -12,7 +12,12 @@ if [ $? -ne 0 ];then
     exit 255
 fi
 
-python3 spider.py > /opt/bishe/log/${start_date}.log
+python3 /opt/bishe/spider/spider.py > /opt/bishe/log/${start_date}.log &
+python3 /opt/bishe/spider/spider1.py > /opt/bishe/log/${start_date}.log &
+python3 /opt/bishe/spider/spider2.py > /opt/bishe/log/${start_date}.log &
+python3 /opt/bishe/spider/spider3.py > /opt/bishe/log/${start_date}.log &
+python3 /opt/bishe/spider/spider4.py > /opt/bishe/log/${start_date}.log &
+python3 /opt/bishe/spider/spider5.py > /opt/bishe/log/${start_date}.log &
 
 if [ $? -ne 0 ];then
     exit 255
