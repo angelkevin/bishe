@@ -1,13 +1,10 @@
-from selenium import webdriver
 from bs4 import BeautifulSoup
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import time
 import pandas as pd
-import threading
 import pymysql
 from sqlalchemy import create_engine
-import os
+import json
 
 pymysql.install_as_MySQLdb()
 user_name = 'root'
@@ -15,136 +12,67 @@ password = 'zkw666..'
 
 DB_STRING = f"mysql+mysqldb://{user_name}:{password}@127.0.0.1:3306/gpdb?charset=utf8"
 engine = create_engine(DB_STRING)
-URLs = [
-    'https://quote.eastmoney.com/center/gridlist.html#sz_a_board',
-    'https://quote.eastmoney.com/center/gridlist.html#bj_a_board',
-    'https://quote.eastmoney.com/center/gridlist.html#sh_a_board',
-    'https://quote.eastmoney.com/center/gridlist.html#gem_board',
-    'https://quote.eastmoney.com/center/gridlist.html#kcb_board',
-    'https://quote.eastmoney.com/center/gridlist.html#b_board']
+import requests
+time_stamp = time.time() 
+time_stamp = int(time_stamp*1000)  
+today = time.strftime('%Y-%m-%d', time.localtime())
 
-options = Options()
-options.add_argument('--headless')
-options.add_argument('--no-sandbox')
-options.add_argument('--disable-gpu')
-options.add_argument('--disable-dev-shm-usage')
-driver = webdriver.Chrome(options=options)
+cookies = {
+    'qgqp_b_id': 'f0eeace5b28b16b04feeefce1693cb8b',
+    'HAList': 'ty-0-831906-N%u821C%u5B87%2Cty-0-000519-%u4E2D%u5175%u7EA2%u7BAD%2Cty-0-000032-%u6DF1%u6851%u8FBE%uFF21%2Cty-1-688522-%u7EB3%u777F%u96F7%u8FBE%2Cty-0-832149-N%u5229%u5C14%u8FBE%2Cty-1-688466-%u91D1%u79D1%u73AF%u5883%2Cty-1-688362-%u752C%u77FD%u7535%u5B50%2Cty-1-688292-%u6D69%u701A%u6DF1%u5EA6%2Cty-1-000001-%u4E0A%u8BC1%u6307%u6570%2Cty-1-688047-%u9F99%u82AF%u4E2D%u79D1',
+    'st_si': '87025462235082',
+    'st_asi': 'delete',
+    'st_pvi': '58485145729842',
+    'st_sp': '2023-01-17%2017%3A51%3A28',
+    'st_inirUrl': 'https%3A%2F%2Fwww.baidu.com%2Flink',
+    'st_sn': '2',
+    'st_psi': '20230223010627267-113200301321-6756937031',
+}
 
-
-
-def spider(url):
-    result = []
-    driver.get(url)
-    time.sleep(1)
-    page_num = driver.find_element(by=By.XPATH, value='//*[@id="main-table_paginate"]/span[1]/a[5]').text
-    for i in range(0, int(page_num)):
-        soup = BeautifulSoup(driver.page_source, 'html.parser')
-
-        massage = soup.find_all(id="table_wrapper-table")
-        page = massage[0]
-        page_massage = page.findAllNext('td')
-        m = 0
-        for j in range(int(len(page_massage) / 20.0) + 1):
-            l = []
-            tt = page_massage[m:m + 19]
-            l.append(tt[0].text)
-
-            l.append(tt[1].text)
-
-            l.append(tt[2].text)
-
-            if str(tt[4]).split("\"")[3] == 'red':
-                l.append(tt[4].text)
-            elif str(tt[4]).split("\"")[3] == 'green':
-                l.append('-' + tt[4].text)
-            else:
-                l.append(tt[4].text)
-
-            if "%" in tt[5].text:
-                l.append(str(round(float(tt[5].text.split("%")[0]) * 0.01, 2)))
-            else:
-                l.append(tt[5].text)
-
-            if str(tt[6]).split("\"")[1] == 'red':
-                l.append(tt[6].text)
-            else:
-                l.append(tt[6].text)
-
-            if "万" in tt[7].text:
-                l.append(str(round(float(tt[7].text.split("万")[0]) * 10000, 2)))
-            elif "亿" in tt[7].text:
-                l.append(str(round(float(tt[7].text.split("万")[0]) * 100000000, 2)))
-            else:
-                l.append(tt[7].text)
-
-            if "万" in tt[8].text:
-                l.append(str(round(float(tt[8].text.split("万")[0]) * 10000, 2)))
-            elif "亿" in tt[8].text:
-                l.append(str(round(float(tt[8].text.split("亿")[0]) * 100000000, 2)))
-            else:
-                l.append(tt[8].text)
-
-            if "%" in tt[9].text:
-                l.append(str(round(float(tt[9].text.split("%")[0]) * 0.01, 2)))
-            else:
-                l.append(tt[9].text)
-
-            l.append(tt[10].text)
-            l.append(tt[11].text)
-            l.append(tt[12].text)
-            l.append(tt[13].text)
-            l.append(tt[14].text)
-
-            if "%" in tt[15].text:
-                l.append(str(round(float(tt[15].text.split("%")[0]) * 0.01, 2)))
-            else:
-                l.append(tt[15].text)
-            l.append(tt[16].text)
-            l.append(tt[17].text)
-            m = m + 19
-            result.append(l)
-        button = driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[2]/div[2]/div[5]/div/div[2]/div/a[2]')
-        driver.execute_script("$(arguments[0]).click()", button)
-        time.sleep(0.5)
-    print(len(result))
-    print(url)
-    return result
+headers = {
+    'Accept': '*/*',
+    'Accept-Language': 'zh-CN,zh;q=0.9',
+    'Connection': 'keep-alive',
+    # 'Cookie': 'qgqp_b_id=f0eeace5b28b16b04feeefce1693cb8b; HAList=ty-0-831906-N%u821C%u5B87%2Cty-0-000519-%u4E2D%u5175%u7EA2%u7BAD%2Cty-0-000032-%u6DF1%u6851%u8FBE%uFF21%2Cty-1-688522-%u7EB3%u777F%u96F7%u8FBE%2Cty-0-832149-N%u5229%u5C14%u8FBE%2Cty-1-688466-%u91D1%u79D1%u73AF%u5883%2Cty-1-688362-%u752C%u77FD%u7535%u5B50%2Cty-1-688292-%u6D69%u701A%u6DF1%u5EA6%2Cty-1-000001-%u4E0A%u8BC1%u6307%u6570%2Cty-1-688047-%u9F99%u82AF%u4E2D%u79D1; st_si=87025462235082; st_asi=delete; st_pvi=58485145729842; st_sp=2023-01-17%2017%3A51%3A28; st_inirUrl=https%3A%2F%2Fwww.baidu.com%2Flink; st_sn=2; st_psi=20230223010627267-113200301321-6756937031',
+    'Referer': 'http://quote.eastmoney.com/',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+}
 
 
-def save_data(data, name):
-    today = time.strftime('%Y-%m-%d', time.localtime())
-    today1 = str(time.time())
-    df = pd.DataFrame(data, columns=[
-        'serial_number',
-        'code',
-        'name',
-        'latest_price',
-        'rise_and_fall',
-        'rise_and_fall_amount',
-        'volume',
-        'turnover',
-        'amplitude',
-        'highest',
-        'lowest',
-        'open_today',
-        'yesterday',
-        'volume_ratio',
-        'turnover_rate',
-        'ratio_p/b',
-        'ratio'
-    ])
+
+for n in range(1,267):
+    response = requests.get(
+    f'http://9.push2.eastmoney.com/api/qt/clist/get?cb=jQuery1124046567885410502186_{time_stamp}&pn={n}&pz=20&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&fields=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62,f128,f136,f115,f152&_={time_stamp}',
+    cookies=cookies,
+    headers=headers,
+    verify=False,)
+
+    jsondata = response.text
+    # print(jsondata)
+    start_data = jsondata.index('{"rc":0,')
+    end_data = jsondata.index('}]}}') + len('}]}}')
+    data = jsondata[start_data:end_data]
+    data_list = json.loads(jsondata[start_data:end_data])['data']['diff']
+    df = pd.DataFrame(data_list)
+    df = df.drop(['f1', 'f13','f11','f20','f21','f22','f24','f25','f62','f115','f140','f141','f136','f152','f128'], axis=1)
     df = df.replace('-', '0')
-    df = df.drop_duplicates(subset=['code'], keep='first')
-    df.insert(17, 'create_time', str(today1), allow_duplicates=False)
+    df.columns= ['latest_price',
+                 'rise_and_fall',
+                 'rise_and_fall_amount',
+                 'volume',
+                 'turnover',
+                 'amplitude',
+                 'turnover_rate',
+                 'ratio_p/b',
+                 'volume_ratio',
+                 'code',
+                 'name',
+                 'highest',
+                 'lowest',
+                 'open_today',
+                 'yesterday',
+                 'ratio']
+    df.to_csv(path_or_buf=f"./data/{today}.csv", index=False, header=False, encoding="UTF-8", mode='a')
     df.to_sql('stock_market_data', con=engine, chunksize=10000, if_exists='append', index=False)
-    #os.mkdir(f"/opt/bishe/data/{name}")
-    df.to_csv(path_or_buf=f"/opt/bishe/data/{name}/{today}.csv", index=False, header=False, encoding="UTF-8",mode='a')
-
-if __name__ == '__main__':
-
-    for i in range(len(URLs)):
-        save_data(spider(URLs[i]),URLs[i].split('#')[1])
-    driver.close()
-
 
 
