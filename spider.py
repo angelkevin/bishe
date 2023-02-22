@@ -37,7 +37,7 @@ def spider(url):
     driver.get(url)
     time.sleep(1)
     page_num = driver.find_element(by=By.XPATH, value='//*[@id="main-table_paginate"]/span[1]/a[5]').text
-    for i in range(0, int(page_num)+1):
+    for i in range(0, int(page_num)):
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
         massage = soup.find_all(id="table_wrapper-table")
@@ -105,6 +105,7 @@ def spider(url):
             result.append(l)
         button = driver.find_element(by=By.XPATH, value='/html/body/div[1]/div[2]/div[2]/div[5]/div/div[2]/div/a[2]')
         driver.execute_script("$(arguments[0]).click()", button)
+        time.sleep(0.5)
     print(len(result))
     print(url)
     return result
