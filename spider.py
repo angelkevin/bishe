@@ -5,16 +5,14 @@ import pandas as pd
 import pymysql
 from sqlalchemy import create_engine
 import json
+import requests
+
 
 pymysql.install_as_MySQLdb()
-user_name = 'root'
-password = 'zkw666..'
-
-DB_STRING = f"mysql+mysqldb://{user_name}:{password}@127.0.0.1:3306/gpdb?charset=utf8"
+DB_STRING = "mysql+mysqldb://root:zkw666..@127.0.0.1:3306/gpdb?charset=utf8"
 engine = create_engine(DB_STRING)
-import requests
-time_stamp = time.time() 
-time_stamp = int(time_stamp*1000)  
+time_stamp1 = time.time()
+time_stamp1 = int(time_stamp1*1000)
 today = time.strftime('%Y-%m-%d', time.localtime())
 
 cookies = {
@@ -42,6 +40,8 @@ headers = {
 result = pd.DataFrame()
 
 for n in range(1,267):
+    time_stamp = time.time() 
+    time_stamp = int(time_stamp*1000)
     response = requests.get(
     f'http://9.push2.eastmoney.com/api/qt/clist/get?cb=jQuery1124046567885410502186_{time_stamp}&pn={n}&pz=20&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&fields=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62,f128,f136,f115,f152&_={time_stamp}',
     cookies=cookies,
@@ -74,7 +74,7 @@ for n in range(1,267):
     indexNames = df[df['latest_price'] == '-'].index
     df.drop(indexNames , inplace=True)
     df = df.replace('-', '0')
-    df.insert(16, 'create_time', str(time_stamp), allow_duplicates=False)
+    df.insert(16, 'create_time', str(time_stamp1), allow_duplicates=False)
     result = pd.concat([result,df],ignore_index=True)
     
 
