@@ -48,7 +48,6 @@ for n in range(1,267):
     verify=False,)
 
     jsondata = response.text
-    # print(jsondata)
     start_data = jsondata.index('{"rc":0,')
     end_data = jsondata.index('}]}}') + len('}]}}')
     data = jsondata[start_data:end_data]
@@ -72,6 +71,7 @@ for n in range(1,267):
                  'open_today',
                  'yesterday',
                  'ratio']
+    df.insert(16, 'create_time', str(time_stamp/1000), allow_duplicates=False)
     df.to_csv(path_or_buf=f"./data/{today}.csv", index=False, header=False, encoding="UTF-8", mode='a')
     df.to_sql('stock_market_data', con=engine, chunksize=10000, if_exists='append', index=False)
 
