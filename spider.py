@@ -73,6 +73,7 @@ for n in range(1,267):
     indexNames = df[df['latest_price'] == '-'].index
     df.drop(indexNames , inplace=True)
     df = df.replace('-', '0')
+    df = df.drop_duplicates(subset=['code'], keep='first')
     df.insert(16, 'create_time', str(time_stamp), allow_duplicates=False)
     df.to_csv(path_or_buf=f"./data/{today}.csv", index=False, header=False, encoding="UTF-8", mode='a')
     df.to_sql('stock_market_data', con=engine, chunksize=10000, if_exists='append', index=False)
