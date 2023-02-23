@@ -45,8 +45,8 @@ for n in range(1,267):
     f'http://9.push2.eastmoney.com/api/qt/clist/get?cb=jQuery1124046567885410502186_{time_stamp}&pn={n}&pz=20&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&fields=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62,f128,f136,f115,f152&_={time_stamp}',
     cookies=cookies,
     headers=headers,
-    verify=False)
-    time.sleep(0.5)
+    verify=False,)
+
     jsondata = response.text
     start_data = jsondata.index('{"rc":0,')
     end_data = jsondata.index('}]}}') + len('}]}}')
@@ -54,7 +54,6 @@ for n in range(1,267):
     data_list = json.loads(jsondata[start_data:end_data])['data']['diff']
     df = pd.DataFrame(data_list)
     df = df.drop(['f1', 'f13','f11','f20','f21','f22','f24','f25','f62','f115','f140','f141','f136','f152','f128'], axis=1)
-    df = df.replace('-', '0')
     df.columns= ['latest_price',
                  'rise_and_fall',
                  'rise_and_fall_amount',
@@ -71,7 +70,10 @@ for n in range(1,267):
                  'open_today',
                  'yesterday',
                  'ratio']
-    df.insert(16, 'create_time', str(time_stamp/1000), allow_duplicates=False)
+    indexNames = df[df['latest_price'] == '-'].index
+    df.drop(indexNames , inplace=True)
+    df = df.replace('-', '0')
+    df.insert(16, 'create_time', str(time_stamp), allow_duplicates=False)
     df.to_csv(path_or_buf=f"./data/{today}.csv", index=False, header=False, encoding="UTF-8", mode='a')
     df.to_sql('stock_market_data', con=engine, chunksize=10000, if_exists='append', index=False)
 
