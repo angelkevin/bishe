@@ -71,9 +71,6 @@ for n in range(1,267):
                  'open_today',
                  'yesterday',
                  'ratio']
-    indexNames = df[df['latest_price'] == '-'].index
-    df.drop(indexNames , inplace=True)
-    df = df.replace('-', '0')
     df.insert(16, 'create_time', str(time_stamp1), allow_duplicates=False)
     result = pd.concat([result,df],ignore_index=True)
     
