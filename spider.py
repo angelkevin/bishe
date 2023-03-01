@@ -7,13 +7,14 @@ from sqlalchemy import create_engine
 import json
 import requests
 
-
-pymysql.install_as_MySQLdb()
-DB_STRING = "mysql+mysqldb://root:zkw666..@127.0.0.1:3306/gpdb?charset=utf8"
-engine = create_engine(DB_STRING)
-time_stamp1 = time.time()
-time_stamp1 = int(time_stamp1-86400)*1000
 today = time.strftime('%Y-%m-%d', time.localtime())
+pymysql.install_as_MySQLdb()
+user_name = 'root'
+password = 'zkw666..'
+
+DB_STRING = f'mysql+mysqldb://{user_name}:{password}@127.0.0.1:3306/gpdb?charset=utf8'
+
+engine = create_engine(DB_STRING)
 
 cookies = {
     'qgqp_b_id': 'f0eeace5b28b16b04feeefce1693cb8b',
@@ -37,51 +38,56 @@ headers = {
 }
 
 
-result = pd.DataFrame()
+def get_data(time_stamp):
+    result = pd.DataFrame()
+    for n in range(1,267):
+        # time_stamp = time.time()
+        # time_stamp = int(time_stamp*1000)
+        response = requests.get(
+        f'http://9.push2.eastmoney.com/api/qt/clist/get?cb=jQuery1124046567885410502186_{time_stamp}&pn={n}&pz=20&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&fields=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62,f128,f136,f115,f152&_={time_stamp}',
+        cookies=cookies,
+        headers=headers,
+        verify=False,)
+        jsondata = response.text
+        start_data = jsondata.index('{"rc":0,')
+        end_data = jsondata.index('}]}}') + len('}]}}')
+        data = jsondata[start_data:end_data]
+        data_list = json.loads(jsondata[start_data:end_data])['data']['diff']
+        df = pd.DataFrame(data_list)
+        df = df.drop(['f1', 'f13','f11','f20','f21','f22','f24','f25','f62','f115','f140','f141','f136','f152','f128'], axis=1)
+        df.columns= ['latest_price',
+                     'rise_and_fall',
+                     'rise_and_fall_amount',
+                     'volume',
+                     'turnover',
+                     'amplitude',
+                     'turnover_rate',
+                     'ratio_p/b',
+                     'volume_ratio',
+                     'code',
+                     'name',
+                     'highest',
+                     'lowest',
+                     'open_today',
+                     'yesterday',
+                     'ratio']
+        result = pd.concat([result,df],ignore_index=True)
+    print(len(result))
+    result.insert(16, 'create_time', str(time_stamp), allow_duplicates=False)
+    result.to_csv(path_or_buf=f"./data/{today}.csv", index=False, header=False, encoding="UTF-8", mode='a')
+    result.to_sql('stock_market_data', con=engine, chunksize=10000,if_exists='append', index=False)
 
-for n in range(1,267):
-    time_stamp = time.time() 
-    time_stamp = int(time_stamp-86400)*1000
-    response = requests.get(
-    f'http://9.push2.eastmoney.com/api/qt/clist/get?cb=jQuery1124046567885410502186_{time_stamp}&pn={n}&pz=20&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&wbp2u=|0|0|0|web&fid=f3&fs=m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048&fields=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f22,f11,f62,f128,f136,f115,f152&_={time_stamp}',
-    cookies=cookies,
-    headers=headers,
-    verify=False,)
-
-    jsondata = response.text
-    start_data = jsondata.index('{"rc":0,')
-    end_data = jsondata.index('}]}}') + len('}]}}')
-    data = jsondata[start_data:end_data]
-    data_list = json.loads(jsondata[start_data:end_data])['data']['diff']
-    df = pd.DataFrame(data_list)
-    df = df.drop(['f1', 'f13','f11','f20','f21','f22','f24','f25','f62','f115','f140','f141','f136','f152','f128'], axis=1)
-    df.columns= ['latest_price',
-                 'rise_and_fall',
-                 'rise_and_fall_amount',
-                 'volume',
-                 'turnover',
-                 'amplitude',
-                 'turnover_rate',
-                 'ratio_p/b',
-                 'volume_ratio',
-                 'code',
-                 'name',
-                 'highest',
-                 'lowest',
-                 'open_today',
-                 'yesterday',
-                 'ratio']
-    df.insert(16, 'create_time', str(time_stamp1), allow_duplicates=False)
-    result = pd.concat([result,df],ignore_index=True)
-    
-
-result.drop_duplicates('code', keep='first',inplace=True)
-result.to_sql('stock_market_data', con=engine, chunksize=10000, if_exists='append', index=False)
-result.to_csv(path_or_buf=f"./data/{today}.csv", index=False, header=False, encoding="UTF-8", mode='a')
-
-
-
-
-
-
-
+db = pymysql.connect(host='47.92.194.92',
+                     user='root',
+                     password='zkw666..',
+                     database='gpdb',
+                     charset='utf8')
+cur = db.cursor()
+if __name__ == '__main__':
+    cur.execute('select * from time_stamp')
+    data = cur.fetchall()
+    for i in data:
+        for j in i:
+            get_data(j)
+    cur.close()
+    db.close()

@@ -12,7 +12,7 @@ if [ $? -ne 0 ];then
     exit 255
 fi
 
-python3 /opt/bishe/spider.py > /opt/bishe/log/${start_date}.log
+python3 /opt/bishe/spider_plus.py
 if [ $? -ne 0 ];then
     exit 255
 fi
